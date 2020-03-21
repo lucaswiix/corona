@@ -8,5 +8,12 @@ module.exports = {
             logging: true,
             defaults: body
         });
+    },
+    updateRequest: async (body, filter) => {
+        return await Request.update(body, {
+            where: filter,
+            raw: true,
+            logging: true,
+        });
     }
 };
