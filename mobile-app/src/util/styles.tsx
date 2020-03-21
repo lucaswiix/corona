@@ -1,7 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { ThemeColor } from '../../util/styles';
 
-export const styles = StyleSheet.create({
+export const ThemeColor = {
+  primary: '#fddb3a',
+  secondary: '#ede59a',
+  third: '#f2f9f1',
+  latest: '#f6f4e6',
+};
+
+export const main = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -13,7 +19,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginTop: 30,
   },
-
+  formGroup: {
+    paddingVertical: 10,
+  },
   label: {
     fontWeight: 'bold',
     color: '#444',
@@ -48,11 +56,5 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     marginVertical: 5,
     textAlign: 'center',
-  },
-  footer: {
-    marginTop: 10,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexDirection: 'row',
   },
 });
