@@ -7,14 +7,11 @@ const getUser = (req, res) => {
 
 const postUser = async (req, res) => {
     try {
-        console.log('oi  ', req);
-        const userCheck = userDAO.findUser(req.body);
-        console.log('check --> ', userCheck);
-        if (userCheck) return res.send('Alredy exists');
-        const response = await userDAO.insertUser(req.body);
-        console.log('resp -->> ', response);
-        res.json(response);
+        const [user, check] = await userDAO.findOrCreateUser(req.body);
+        if (!check) return res.json({'status': '0', 'msg': 'Alredy Exists'});
+        res.json({'status': '1', 'msg': 'success'});
     } catch (err) {
+        console.error(err);
         res.json(err);
     };
 };

@@ -1,8 +1,8 @@
-const User = require('../sequelize').User;
+const Request = require('../sequelize').Request;
 
 module.exports = {
-    findOrCreateUser: async (body) => {
-        return await User.findOrCreate({
+    createRequest: async (body) => {
+        return await Request.findOrCreate({
             where: body,
             raw: true,
             logging: true,
