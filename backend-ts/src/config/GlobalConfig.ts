@@ -7,11 +7,11 @@ dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 if (process.env.NODE_ENV === 'test') {
   Object.assign(process.env, {
-    SQL_PORT: '65432',
-    SQL_USER: 'thor',
-    SQL_DATABASE: 'livehere',
-    SQL_PASSWORD: 'livehere',
-    SQL_HOST: 'localhost',
+    SQL_PORT: '3307',
+    SQL_USER: 'root',
+    SQL_DATABASE: 'test',
+    SQL_PASSWORD: 'root',
+    SQL_HOST: '0.0.0.0',
     TWILIO_ACCOUNT_SID: 'AC092jfiowjg092opwe2309j1ioe2km320', // FAKE
     TWILIO_AUTH_TOKEN: '0923jri240gnr9384jitnoejwn092r3r', // FAKE
     TWILIO_NUMBER: '+16316512345', // FAKE,

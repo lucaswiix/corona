@@ -2,9 +2,8 @@ import express, { Router } from 'express';
 import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { INVALID_PARAM } from '../error/Errors';
 import { defaultMiddlewares, optionsMiddleware } from '../handler/Middlewares';
-import { UserService } from './UserService';
 import { buildResponseData } from '../handler/Util';
-
+import { UserService } from './UserService';
 
 export function handler(): Router {
   const userService = UserService();
