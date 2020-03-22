@@ -21,7 +21,7 @@ module.exports = (sequelize, type) => {
         }, 
         status: {
             type: Sequelize.STRING,
-            allowNull: true
+            allowNull: false
         },
         userId: {
             type: type.INTEGER,
@@ -34,10 +34,11 @@ module.exports = (sequelize, type) => {
         voluntaryId: {
             type: type.INTEGER,
             allowNull: true,
+            defaultValue: null,
             references: {
                 model: 'users',
                 key: 'id'
             }
         }
-    })
-}
+    });
+};

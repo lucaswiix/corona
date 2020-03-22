@@ -4,7 +4,7 @@ const requestController = require('../controllers/request');
 
 router.get('/', requestController.get);
 router.post('/', requestController.post);
-router.delete('/', requestController.delete);
+router.delete('/', requestController.deleteRequest);
 router.patch('/', requestController.patch);
 
 
