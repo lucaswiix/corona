@@ -19,6 +19,6 @@ mysqlsrv:
         MYSQL_ROOT_PASSWORD: "root"
         MYSQL_DATABASE: "root"
     ports:
-        - "3306:3306"
+        - "3307:3306"
     # volumes:
     #     - ./mysql_vol:/var/lib/mysql

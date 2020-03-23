@@ -6,17 +6,15 @@ dotenv.config();
 process.env.NODE_ENV = 'test';
 
 const DROP_QUERY = `
-    DROP SCHEMA IF EXISTS audit CASCADE;
-    DROP SCHEMA IF EXISTS public CASCADE;
-    CREATE SCHEMA public;
-    GRANT USAGE ON SCHEMA public TO thor;
+    DROP DATABASE IF EXISTS quarentenatest;
+    CREATE DATABASE quarentenatest;
 `;
 
 module.exports = async () => {
   console.time('setup');
   await Promise.all([
-    runMigrations(),
-    appInitialization(),
+    // runMigrations(),
+    // appInitialization(),
   ]);
   if (process.send) {
     process.send('jest-setup-done');
@@ -33,10 +31,10 @@ async function runMigrations() {
 
   const db = new Sequelize({
     host: '0.0.0.0',
-    database: 'test',
+    database: 'quarentenatest',
     username: 'root',
     password: 'root',
-    port: 3307,
+    port: 3308,
     dialect: 'mysql',
     pool: {
       max: 20,
@@ -72,7 +70,7 @@ async function runMigrations() {
 
 async function appInitialization() {
   console.time('app');
-  const PORT = 3307;
+  const PORT = 3308;
   await exec(`kill -9 $(lsof -t -i:${PORT})`);
   const { initApp } = require('../app');
   await initApp({ port: PORT });

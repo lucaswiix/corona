@@ -1,4 +1,6 @@
-import { AutoIncrement, Column, DataType, Model, PrimaryKey, Table, Unique } from 'sequelize-typescript';
+import { AutoIncrement, Column, CreatedAt, DataType, HasMany, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript';
+import RequestModel from './Request';
+import { IRequest } from './RequestInterface';
 import { IUser, UserTypes } from './UserInterface';
 
 
@@ -7,7 +9,7 @@ export default class UserModel extends Model<UserModel> implements IUser {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
-  key: string;
+  id: string;
 
   @Column(DataType.STRING)
   name: string;
@@ -20,4 +22,19 @@ export default class UserModel extends Model<UserModel> implements IUser {
 
   @Column(DataType.STRING)
   phone: string;
+
+  @CreatedAt
+  @Column(DataType.TIME)
+  created_at: Date;
+
+  @UpdatedAt
+  @Column(DataType.TIME)
+  updated_at: Date;
+
+  @HasMany(() => RequestModel, 'user_id')
+  owned_requests: IRequest[];
+
+  @HasMany(() => RequestModel, 'voluntary_id')
+  voluntary_requests: IRequest[];
+
 }

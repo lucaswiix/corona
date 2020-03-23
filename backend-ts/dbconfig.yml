@@ -1,6 +1,6 @@
 test:
   dialect: mysql
-  datasource: root:root@tcp(0.0.0.0:3307)/test?parseTime=true
+  datasource: root:root@tcp(0.0.0.0:3307)/quarentenatest?parseTime=true
   dir: migrations
   table: migrations
 

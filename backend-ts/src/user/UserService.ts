@@ -70,6 +70,7 @@ export const UserService = ({
     const jwtData = {
       exp: newExp(globalConf.USER_JWT_EXPIRATION_TIME),
       user: {
+        id: user.id,
         name: user.name,
         phone: user.phone,
         email: user.email,
