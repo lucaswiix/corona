@@ -11,7 +11,6 @@ Ajudar pessoas que fazem parte dos grupos de risco a conseguirem pessoas que pos
 Tecnologias: 
 
 - Nodejs
-- Rabbit MQ
 - React Native
 - MYSQL
 
