@@ -116,7 +116,6 @@
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.13.0",
     "faker": "^4.1.0",
-    "husky": "^4.2.3",
     "jest": "^24.9.0",
     "jest-when": "^2.7.0",
     "js-beautify": "^1.10.1",
