@@ -7,11 +7,11 @@ dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 if (process.env.NODE_ENV === 'test') {
   Object.assign(process.env, {
-    SQL_PORT: '3307',
-    SQL_USER: 'root',
-    SQL_DATABASE: 'test',
-    SQL_PASSWORD: 'root',
-    SQL_HOST: '0.0.0.0',
+    SQL_PORT: '25432',
+    SQL_USER: 'wiix',
+    SQL_DATABASE: 'quarentena',
+    SQL_PASSWORD: 'quarentena',
+    SQL_HOST: 'localhost',
     TWILIO_ACCOUNT_SID: 'AC092jfiowjg092opwe2309j1ioe2km320', // FAKE
     TWILIO_AUTH_TOKEN: '0923jri240gnr9384jitnoejwn092r3r', // FAKE
     TWILIO_NUMBER: '+16316512345', // FAKE,
@@ -33,6 +33,7 @@ export interface IGlobalConfig {
   SQL_DATABASE: string,
   SQL_HOST: string,
   SQL_PORT: string,
+  SQL_CONN_STRING: string,
 
   TWILIO_ACCOUNT_SID: string,
   TWILIO_AUTH_TOKEN: string;
@@ -90,6 +91,8 @@ class GlobalConfigValidator implements IGlobalConfig {
   @IsString()
   SQL_PORT: string;
 
+  SQL_CONN_STRING: string;
+
   @IsNotEmpty()
   @IsString()
   APP_HOST: string;
@@ -122,6 +125,7 @@ export function buildGlobalConfig({ optionalConf = null, throwErr = false } = {}
     NODE_ENV: String(baseConf.NODE_ENV).toLowerCase(),
     PORT: Number(baseConf.PORT),
     SQL_USER: baseConf.SQL_USER,
+    SQL_CONN_STRING: `postgres://${baseConf.SQL_USER}:${baseConf.SQL_PASSWORD}@${baseConf.SQL_HOST}:${baseConf.SQL_PORT}/${baseConf.SQL_DATABASE}`,
     USER_JWT_EXPIRATION_TIME: Number(baseConf.USER_JWT_EXPIRATION_TIME),
   });
   Object.assign(validator, conf);

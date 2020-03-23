@@ -1,12 +1,13 @@
 export interface IRequest {
-  id: string;
-  user_id: string;
-  voluntary_id: string;
+  key: string;
+  user_account_key: string;
+  voluntary_user_account_key: string;
+  description: string;
   status: RequestStatus;
+  evaluation: number;
+  priority: number;
   latitude: string;
   longitude: string;
-  priority: number;
-  description: string;
   created_at: Date;
   updated_at: Date;
 }

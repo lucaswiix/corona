@@ -12,16 +12,16 @@ import defaultDb from '../sequelize/Sequelize';
 import { BaseOptions } from '../util/Types';
 import { IS_VOLUNTARY_REQUEST_ERROR, REQUEST_NOT_FOUND } from './Errors';
 import { ISearchRequest } from './Types';
-const DEFAULT_EXPIRATION_TIME = 7889400000;
+import { validateRequest } from './ValidationRequest';
 
-const radius = 5000; //5km
+const radius = 5000; // 5km
 
 export const RequestService = ({
   requestModel = RequestModel,
   globalConf = globalConfig,
   Db = defaultDb
 } = {}) => {
-  async function create(data: Partial<IRequest>): Promise<[IRequest, ApplicationError]> {
+  async function create(data: Partial<IRequest>, options?: BaseOptions): Promise<[IRequest, ApplicationError]> {
     try {
       await requestModel.update({
         status: RequestStatus.cancelled,
@@ -35,24 +35,31 @@ export const RequestService = ({
               },
             },
             {
-              user_id: data.user_id
+              user_account_key: data.user_account_key
             }
           ]
-        }
+        },
+        transaction: options?.transaction
       });
 
       const hasVoluntary = await requestModel.findAndCountAll({
         where: {
-          voluntary_id: data.user_id,
+          voluntary_user_account_key: data.user_account_key,
           status: RequestStatus.accepted
-        }
+        },
+        transaction: options?.transaction
       });
 
       if (hasVoluntary.count > 0) {
         return [undefined, IS_VOLUNTARY_REQUEST_ERROR()]
       }
 
-      const create = await requestModel.create({ ...data, priority: 1, status: RequestStatus.searching }, { returning: true });
+      const createdData = { ...data, priority: 1, status: RequestStatus.searching };
+      const [curr, err] = await validateRequest(createdData);
+      if (err) {
+        return [undefined, err];
+      }
+      const create = await requestModel.create(curr, { returning: true, transaction: options?.transaction });
 
       return [create, undefined];
     } catch (error) {
@@ -60,26 +67,28 @@ export const RequestService = ({
     }
   }
 
-  async function findAll(userId, options?: Partial<BaseOptions>): Promise<[IRequest[], ResponseMetadata]> {
+  async function findAll(userKey, options?: Partial<BaseOptions>): Promise<[IRequest[], ResponseMetadata]> {
     const pagination = getPagination(options);
     const requests = await requestModel.findAll({
       where: {
-        voluntary_id: userId,
+        voluntary_user_account_key: userKey,
         status: {
-          $in: [RequestStatus.finished, RequestStatus.accepted, RequestStatus.cancelled]
+          $in: [RequestStatus.finished, RequestStatus.accepted]
         }
       },
-      order: ['created_at', 'desc'],
-      ...pagination
+      order: [['created_at', 'desc']],
+      ...pagination,
+      transaction: options?.transaction
     });
 
     const totalCount = await requestModel.count({
       where: {
-        voluntary_id: userId,
+        voluntary_user_account_key: userKey,
         status: {
-          $in: [RequestStatus.finished, RequestStatus.accepted, RequestStatus.cancelled]
+          $in: [RequestStatus.finished, RequestStatus.accepted]
         }
       },
+      transaction: options?.transaction
     });
 
     const metadata = {
@@ -91,47 +100,14 @@ export const RequestService = ({
     return [requests, metadata];
   }
 
-  async function accept(
-    data: Partial<IRequest>,
-  ): Promise<[IRequest, ApplicationError]> {
+  async function findVoluntary(data: Partial<ISearchRequest>, options?: Partial<BaseOptions>): Promise<[IRequest[], ApplicationError]> {
 
     const isVoluntary = await requestModel.count({
       where: {
-        voluntary_id: data.user_id,
+        voluntary_user_account_key: data.user_account_key,
         status: RequestStatus.accepted
-      }
-    });
-
-    if (isVoluntary > 0) {
-      return [undefined, IS_VOLUNTARY_REQUEST_ERROR()];
-    }
-
-    const [count, acceptUpdate] = await requestModel.update({
-      voluntary_id: data.user_id,
-      status: RequestStatus.accepted
-    }, {
-      where: {
-        id: data.id,
-        longitude: data.longitude,
-        latitude: data.latitude
       },
-      returning: true
-    });
-
-    if (count === 0) {
-      return [undefined, REQUEST_NOT_FOUND(data.id)];
-    }
-
-    return [acceptUpdate[0], undefined];
-  }
-
-  async function findVoluntary(data: Partial<ISearchRequest>): Promise<[IRequest[], ApplicationError]> {
-
-    const isVoluntary = await requestModel.count({
-      where: {
-        voluntary_id: data.user_id,
-        status: RequestStatus.accepted
-      }
+      transaction: options?.transaction
     });
 
     if (isVoluntary > 0) {
@@ -143,58 +119,89 @@ export const RequestService = ({
         status: RequestStatus.searching,
         [Op.and]: [
           Db.literal(
-            `acos(sin(${data.latitude}) * sin(latitude) + cos(${data.latitude}) * cos(Lat) * cos(Lon - (${data.longitude}))) * 6371 <= ${radius}`
+            `earth_distance(ll_to_earth(latitude::numeric, longitude::numeric), ll_to_earth(${Number(data.latitude)}, ${Number(data.longitude)})) < ${data.radius || radius}`
           ),
         ]
       },
-      order: ['created_at', 'desc'],
-      limit: 10
+      order: [['created_at', 'desc']],
+      limit: 10,
+      transaction: options?.transaction
     });
 
     return [findData, undefined]
   }
 
-  async function finishRequest(data: Partial<IRequest>): Promise<[IRequest, ApplicationError]> {
+  async function accept(
+    data: Partial<IRequest>,
+    options?: Partial<BaseOptions>
+  ): Promise<[IRequest, ApplicationError]> {
 
-    const [count, request] = await requestModel.update({ status: RequestStatus.finished }, {
+    const isVoluntary = await requestModel.count({
       where: {
-        id: data.id,
-        status: RequestStatus.accepted,
-        voluntary_id: data.user_id
+        voluntary_user_account_key: data.user_account_key,
+        status: RequestStatus.accepted
       },
-      returning: true
+      transaction: options?.transaction
+
+    });
+
+    if (isVoluntary > 0) {
+      return [undefined, IS_VOLUNTARY_REQUEST_ERROR()];
+    }
+
+    const [count, acceptUpdate] = await requestModel.update({
+      voluntary_user_account_key: data.user_account_key,
+      status: RequestStatus.accepted
+    }, {
+      where: {
+        user_account_key: {
+          $not: data.user_account_key
+        },
+        key: data.key,
+        longitude: data.longitude,
+        latitude: data.latitude
+      },
+      returning: true,
+      transaction: options?.transaction
     });
 
     if (count === 0) {
-      return [undefined, REQUEST_NOT_FOUND(data.user_id)];
+      return [undefined, REQUEST_NOT_FOUND(data.key)];
+    }
+
+    return [acceptUpdate[0], undefined];
+  }
+
+  async function finishRequest(data: Partial<IRequest>, options?: Partial<BaseOptions>): Promise<[IRequest, ApplicationError]> {
+
+    const [count, request] = await requestModel.update({ status: RequestStatus.finished }, {
+      where: {
+        key: data.key,
+        status: RequestStatus.accepted,
+        $or: [
+          {
+            voluntary_user_account_key: data.user_account_key
+          },
+          {
+            user_account_key: data.user_account_key,
+          }
+        ]
+
+      },
+      returning: true,
+      transaction: options?.transaction
+    });
+
+    if (count === 0) {
+      return [undefined, REQUEST_NOT_FOUND(data.user_account_key)];
     }
 
     return [request[0], undefined]
   }
 
-
-  async function checkAuthToken(
-    authToken: string,
-  ): Promise<[any, ApplicationError]> {
-    if (!authToken) {
-      return [undefined, INVALID_AUTH()];
-    }
-    try {
-      const payload = jwt.decode(authToken, globalConf.USER_JWT_SECRET);
-      const exp = Number(payload?.exp);
-      if (isNaN(exp) || exp < new Date().getTime()) {
-        return [undefined, INVALID_AUTH()];
-      }
-      return [payload, undefined];
-    } catch (err) {
-      return [undefined, INVALID_AUTH()];
-    }
-  }
-
   return Object.freeze({
     create,
     accept,
-    checkAuthToken,
     finishRequest,
     findVoluntary,
     findAll

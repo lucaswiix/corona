@@ -2,15 +2,14 @@ import jwt from 'jwt-simple';
 import globalConfig from '../config/GlobalConfig';
 import { INVALID_AUTH, INVALID_PARAM, TOKEN_EXPIRED } from '../error/Errors';
 import { ApplicationError } from '../error/Types';
+import { UserAuthResponse } from '../handler/Util';
 import UserModel from '../model/User';
 import { IUser } from '../model/UserInterface';
 import { TwilioService } from '../twilio/Service';
 import { parsePhone } from '../util/utilFunctions';
-import { UserAuthResponse } from '../handler/Util';
 
 
 const DEFAULT_EXPIRATION_TIME = 7889400000;
-
 
 export const UserService = ({
   userModel = UserModel,
@@ -70,7 +69,7 @@ export const UserService = ({
     const jwtData = {
       exp: newExp(globalConf.USER_JWT_EXPIRATION_TIME),
       user: {
-        id: user.id,
+        key: user.key,
         name: user.name,
         phone: user.phone,
         email: user.email,
@@ -83,8 +82,6 @@ export const UserService = ({
 
     return [token, undefined];
   }
-
-
 
   async function signup(data: Partial<IUser>): Promise<[IUser, ApplicationError]> {
 
@@ -108,17 +105,35 @@ export const UserService = ({
     });
 
     return [createdUser, undefined];
-
   }
 
-
+  async function checkAuthToken(
+    authToken: string,
+  ): Promise<[any, ApplicationError]> {
+    if (!authToken) {
+      return [undefined, INVALID_AUTH()];
+    }
+    try {
+      const payload = jwt.decode(authToken, globalConf.USER_JWT_SECRET);
+      const exp = Number(payload?.exp);
+      if (isNaN(exp) || exp < new Date().getTime()) {
+        return [undefined, INVALID_AUTH()];
+      }
+      return [payload, undefined];
+    } catch (err) {
+      return [undefined, INVALID_AUTH()];
+    }
+  }
 
   return Object.freeze({
     sendToken,
     checkToken,
-    signup
+    signup,
+    checkAuthToken
   });
 };
+
 function newExp(duration = DEFAULT_EXPIRATION_TIME): number {
   return new Date().getTime() + duration;
 }
+

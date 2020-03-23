@@ -1,0 +1,3 @@
+export const DEFAULT_TIMEOUT = 30 * 1000;
+
+export const DEFAULT_EXPIRATION_TIME = 7889400000;

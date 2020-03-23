@@ -1,6 +1,6 @@
 export interface ISearchRequest {
-  user_id: string;
+  user_account_key: string;
   latitude: string;
   longitude: string;
-  radio: string;
+  radius: number;
 }

@@ -8,7 +8,7 @@ const db = new Sequelize({
   username: GlobaConfig.SQL_USER,
   password: GlobaConfig.SQL_PASSWORD,
   port: GlobaConfig.SQL_PORT,
-  dialect: 'mysql',
+  dialect: 'postgres',
   pool: {
     max: 20,
     min: 1,

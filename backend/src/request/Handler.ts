@@ -3,9 +3,9 @@ import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { defaultMiddlewares, optionsMiddleware } from '../handler/Middlewares';
 import { buildResponseData, buildResponseResults } from '../handler/Util';
 import { IRequest } from '../model/RequestInterface';
+import { AuthMiddleware } from '../user/Middlewares';
 import { RequestService } from './RequestService';
 import { ISearchRequest } from './Types';
-import { INVALID_AUTH } from '../error/Errors';
 
 export function handler(): Router {
   const requestService = RequestService();
@@ -13,13 +13,12 @@ export function handler(): Router {
   const middlewares = [...defaultMiddlewares, optionsMiddleware];
 
   router.get('/',
-    RequestAuthMiddleware(),
+    AuthMiddleware(),
     ...middlewares,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { offset, limit } = req.query;
-
-        const [results, metadata] = await requestService.findAll(res?.locals?.user?.id, {
+        const [results, metadata] = await requestService.findAll(res?.locals?.auth.user.key, {
           offset: parseInt(offset, 10),
           limit: parseInt(limit, 10),
         });
@@ -48,13 +47,13 @@ export function handler(): Router {
 
   router.post(
     '/new_request',
-    RequestAuthMiddleware(),
+    AuthMiddleware(),
     ...middlewares,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const data: Partial<IRequest> = req.body;
 
-        const [result, err] = await requestService.create({ ...data, user_id: res?.locals?.user?.id });
+        const [result, err] = await requestService.create({ ...data, user_account_key: res?.locals?.auth?.user?.key });
 
         const responseData = buildResponseData({
           status: 200,
@@ -72,13 +71,13 @@ export function handler(): Router {
 
   router.post(
     '/finish_request',
-    RequestAuthMiddleware(),
+    AuthMiddleware(),
     ...middlewares,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const data: Partial<IRequest> = req.body;
 
-        const [result, err] = await requestService.finishRequest({ ...data, user_id: res?.locals?.user?.id });
+        const [result, err] = await requestService.finishRequest({ ...data, user_account_key: res?.locals?.auth?.user?.key });
 
         const responseData = buildResponseData({
           status: 200,
@@ -96,13 +95,13 @@ export function handler(): Router {
 
   router.get(
     '/find',
-    RequestAuthMiddleware(),
+    AuthMiddleware(),
     ...middlewares,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const data: Partial<ISearchRequest> = req.body;
 
-        const [result, err] = await requestService.findVoluntary({ ...data, user_id: res?.locals?.user?.id });
+        const [result, err] = await requestService.findVoluntary({ ...data, user_account_key: res?.locals?.auth?.user?.key });
 
         const responseData = buildResponseData({
           status: 200,
@@ -120,13 +119,13 @@ export function handler(): Router {
 
   router.post(
     '/accept_request',
-    RequestAuthMiddleware(),
+    AuthMiddleware(),
     ...middlewares,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const data = req.body
 
-        const [result, err] = await requestService.accept({ ...data, user_id: res?.locals?.user.id });
+        const [result, err] = await requestService.accept({ ...data, user_account_key: res?.locals?.auth?.user?.key });
 
         const responseData = buildResponseData({
           status: 201,
@@ -143,26 +142,3 @@ export function handler(): Router {
 
   return router;
 }
-
-export const RequestAuthMiddleware = (
-  requestService = RequestService()
-) => async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authToken = req.header('auth-token');
-    if (!authToken) {
-      const response = buildResponseData({ status: 402, err: INVALID_AUTH() });
-      res.status(response.status).json(response);
-      return;
-    }
-    const [user, err] = await requestService.checkAuthToken(authToken);
-    if (err) {
-      const response = buildResponseData({ status: err.status, err });
-      res.status(response.status).json(response);
-      return;
-    }
-    res.locals.user = user;
-    next();
-  } catch (err) {
-    next(err);
-  }
-};

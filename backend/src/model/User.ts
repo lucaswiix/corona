@@ -4,15 +4,21 @@ import { IRequest } from './RequestInterface';
 import { IUser, UserTypes } from './UserInterface';
 
 
-@Table({ modelName: 'user' })
+@Table({ modelName: 'user_account' })
 export default class UserModel extends Model<UserModel> implements IUser {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
-  id: string;
+  key: string;
 
   @Column(DataType.STRING)
   name: string;
+
+  @Column(DataType.STRING)
+  cpf: string;
+
+  @Column(DataType.DATE)
+  birthday: Date;
 
   @Column(DataType.SMALLINT)
   type: UserTypes;
@@ -31,10 +37,10 @@ export default class UserModel extends Model<UserModel> implements IUser {
   @Column(DataType.TIME)
   updated_at: Date;
 
-  @HasMany(() => RequestModel, 'user_id')
+  @HasMany(() => RequestModel, 'user_account_key')
   owned_requests: IRequest[];
 
-  @HasMany(() => RequestModel, 'voluntary_id')
+  @HasMany(() => RequestModel, 'voluntary_user_account_key')
   voluntary_requests: IRequest[];
 
 }

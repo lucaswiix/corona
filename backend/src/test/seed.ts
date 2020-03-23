@@ -11,24 +11,24 @@ export interface Seed<T> {
 
 
 const functionGenerateUser = (data: Partial<IUser>, limit): Partial<IUser>[] => {
-  return [...Array(limit - 1).keys()].map((_, index) => ({
-    id: index.toString(),
+  return [...Array(limit).keys()].map((_, index) => ({
+    key: String(((index + 1) * 1000)),
     type: UserTypes.normal,
     name: faker.name.findName(),
-    email: faker.internet.email(),
-    phone: faker.phone.phoneNumber(),
+    email: `mailtest${index + 1}@mail.com`,
+    phone: faker.phone.phoneNumber().replace(/[^0-9+]/g, ''),
     ...data
   }));
 }
 
 const functionGenerateRequest = (data: Partial<IRequest>, limit): Partial<IRequest>[] => {
   return [...Array(limit - 1).keys()].map((_, index) => ({
-    id: index.toString(),
-    voluntary_id: null,
-    user_id: UserSeed.data[0].id,
+    key: String(((index + 1) * 1000)),
+    user_account_key: UserSeed.data[0].key,
     status: RequestStatus.searching,
-    latitude: faker.address.latitude(),
-    longitude: faker.address.longitude(),
+    priority: 1,
+    latitude: '-22.849078',
+    longitude: '-47.084030',
     ...data
   }));
 }
@@ -38,18 +38,13 @@ export const UserSeed: Seed<IUser> = {
   data: functionGenerateUser({
     type: UserTypes.normal,
     name: faker.name.findName(),
-    email: faker.internet.email(),
-    phone: faker.phone.phoneNumber(),
-  }, 10)
+  }, 2)
 };
 
 export const RequestSeed: Seed<IRequest> = {
   model: RequestModel,
   data: functionGenerateRequest({
-    voluntary_id: null,
-    user_id: UserSeed.data[0].id,
-    status: RequestStatus.searching,
-    latitude: faker.address.latitude,
-    longitude: faker.address.longitude
-  }, 10)
+    user_account_key: UserSeed.data[0].key,
+    status: RequestStatus.searching
+  }, 2)
 };

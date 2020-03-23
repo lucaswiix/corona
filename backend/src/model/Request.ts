@@ -9,16 +9,22 @@ export default class RequestModel extends Model<RequestModel> implements IReques
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
-  id: string;
+  key: string;
 
   @Column(DataType.INTEGER)
-  user_id: string;
+  user_account_key: string;
 
   @Column(DataType.INTEGER)
-  voluntary_id: string;
+  voluntary_user_account_key: string;
+
+  @Column(DataType.TEXT)
+  description: string;
 
   @Column(DataType.STRING)
   status: RequestStatus;
+
+  @Column(DataType.INTEGER)
+  evaluation: number;
 
   @Column(DataType.STRING)
   latitude: string;
@@ -29,9 +35,6 @@ export default class RequestModel extends Model<RequestModel> implements IReques
   @Column(DataType.INTEGER)
   priority: number;
 
-  @Column(DataType.TEXT)
-  description: string;
-
   @CreatedAt
   @Column(DataType.TIME)
   created_at: Date;
@@ -40,9 +43,9 @@ export default class RequestModel extends Model<RequestModel> implements IReques
   @Column(DataType.TIME)
   updated_at: Date;
 
-  @BelongsTo(() => UserModel, 'user_id')
+  @BelongsTo(() => UserModel, 'user_account_key')
   owner_user: IUser;
 
-  @BelongsTo(() => UserModel, 'voluntary_id')
+  @BelongsTo(() => UserModel, 'voluntary_user_account_key')
   volundary_user: IUser;
 }

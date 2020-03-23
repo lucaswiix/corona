@@ -5,19 +5,25 @@ import { INVALID_REQUEST } from './Errors';
 
 class ValidationRequest implements Partial<IRequest> {
   @IsOptional()
+  key: string;
+
+  @IsOptional()
   description: string;
 
   @IsNotEmpty()
-  user_id: string;
+  user_account_key: string;
 
   @IsOptional()
-  voluntary_id: string;
+  voluntary_user_account_key: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   status: RequestStatus;
 
-  @IsOptional()
+  @IsNotEmpty()
   priority: number;
+
+  @IsOptional()
+  evaluation: number;
 
   @IsNotEmpty()
   longitude: string;
@@ -25,7 +31,6 @@ class ValidationRequest implements Partial<IRequest> {
   @IsNotEmpty()
   latitude: string;
 }
-
 export function validateRequest(
   data: Partial<IRequest>
 ): [Partial<IRequest>, ApplicationError] {

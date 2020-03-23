@@ -1,9 +1,11 @@
 export interface IUser {
-  id: string;
+  key: string;
   name: string;
+  cpf: string;
+  birthday: Date;
   email: string;
-  phone: string;
   type: UserTypes;
+  phone: string;
   created_at: Date;
   updated_at: Date;
 

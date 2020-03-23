@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import GlobalConfig from './config/GlobalConfig';
 import { cacheMiddleware, errorHandler, optionsMiddleware, tidMiddleware } from './handler/Middlewares';
+import { handler as requestHandler } from './request/Handler';
 import './sequelize/Sequelize';
 import { handler as userHandler } from './user/Handler';
 
@@ -23,6 +24,7 @@ export function initApp({ port = GlobalConfig.PORT } = {}) {
     app.use(tidMiddleware);
 
     app.use('/v1/user', userHandler());
+    app.use('/v1/request', requestHandler());
 
     app.use(errorHandler);
 
