@@ -136,7 +136,7 @@
     "typescript": "^3.8.2",
     "typescript-tslint-plugin": "^0.2.1",
     "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.2",
+    "webpack-cli": "^3.3.12",
     "webpack-node-externals": "^1.7.2",
     "xml2json": "^0.11.2"
   }
