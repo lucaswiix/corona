@@ -48,7 +48,7 @@
     "dnscache": "^1.0.1",
     "docxtemplater": "^3.4.1",
     "dotenv": "^6.0.0",
-    "express": "^4.15.3",
+    "express": "^4.17.3",
     "extenso": "^0.4.6",
     "gaxios": "^2.0.1",
     "gm": "^1.23.1",
