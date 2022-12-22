@@ -60,7 +60,7 @@
     "googleapis47": "https://registry.npmjs.org/googleapis/-/googleapis-47.0.0.tgz#33f2ce796b420d56360279df3c217b9a9d25bdf2",
     "helmet": "^3.11.0",
     "jsdom": "^15.1.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jszip": "2",
     "jwt-simple": "^0.5.1",
     "knex": "^0.17.5",
